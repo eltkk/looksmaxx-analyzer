@@ -220,7 +220,7 @@ export default function HomePage() {
           </div>
           <span className="font-bold text-white text-lg tracking-tight">FaceRank</span>
         </div>
-        <div className="text-sm text-zinc-500">3 бесплатных скана</div>
+        <div className="text-sm text-zinc-500">Бесплатно</div>
       </nav>
 
       {/* Hero */}
@@ -342,7 +342,7 @@ export default function HomePage() {
           </button>
 
           <p className="text-center text-zinc-600 text-xs">
-            3 скана бесплатно · Фото не сохраняются · Анализ занимает ~15 секунд
+            Фото не сохраняются · Анализ занимает ~15 секунд
           </p>
         </form>
       </section>
