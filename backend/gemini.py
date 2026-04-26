@@ -3,21 +3,30 @@ from typing import Optional
 
 def _score_canthal(tilt: float) -> float:
     if tilt >= 4:   return 9.5
-    if tilt >= 2:   return 8.5
-    if tilt >= 0:   return 7.0
-    if tilt >= -2:  return 5.0
-    if tilt >= -4:  return 3.5
-    return 2.5
+    if tilt >= 2:   return 8.0
+    if tilt >= 0.5: return 6.5
+    if tilt >= -1:  return 5.0
+    if tilt >= -3:  return 3.5
+    return 2.0
 
 
-def _score_range(value: float, ideal_min: float, ideal_max: float, floor: float = 3.5) -> float:
+def _score_symmetry(sym: float) -> float:
+    # MediaPipe symmetry skews high — recalibrate
+    if sym >= 96:  return 9.0
+    if sym >= 92:  return 7.5
+    if sym >= 86:  return 6.0
+    if sym >= 78:  return 4.5
+    if sym >= 68:  return 3.0
+    return 2.0
+
+
+def _score_range(value: float, ideal_min: float, ideal_max: float, floor: float = 2.0) -> float:
     if ideal_min <= value <= ideal_max:
-        return 9.0
-    mid = (ideal_min + ideal_max) / 2
+        return 8.5
     span = ideal_max - ideal_min
     distance = max(0, ideal_min - value, value - ideal_max)
-    penalty = (distance / span) * 7.0
-    return max(floor, 9.0 - penalty)
+    penalty = (distance / span) * 12.0
+    return max(floor, 8.5 - penalty)
 
 
 def _score_to_tier(score: float) -> str:
@@ -147,16 +156,16 @@ def get_analysis(
     # Per-zone scores with correct ranges for these MediaPipe landmarks
     cant_s  = round(_score_canthal(canthal), 1)
     eye_s   = round((_score_range(eye, 0.25, 0.38) + cant_s + _score_range(ipd, 0.38, 0.52)) / 3, 1)
-    nose_s  = round(_score_range(nose, 0.25, 0.38), 1)
-    jaw_s   = round((_score_range(jaw, 0.95, 1.15) + _score_range(fwhr, 0.60, 0.82)) / 2, 1)
-    cheek_s = round(_score_range(fwhr, 0.62, 0.80), 1)
+    nose_s  = round(_score_range(nose, 0.25, 0.35), 1)
+    jaw_s   = round((_score_range(jaw, 0.95, 1.12) + _score_range(fwhr, 0.60, 0.80)) / 2, 1)
+    cheek_s = round(_score_range(fwhr, 0.62, 0.78), 1)
     lip_s   = round(_score_range(mouth, 1.25, 1.65), 1)
-    sym_s   = round(max(3.5, symmetry / 10), 1)
+    sym_s   = round(_score_symmetry(symmetry), 1)
     brow_s  = round(cant_s, 1)
-    fore_s  = 7.0
+    fore_s  = round(_score_range(float(thirds.split("/")[0]) if "/" in thirds else 33, 28, 38), 1)
 
     overall = round(
-        (eye_s * 1.4 + nose_s + jaw_s * 1.3 + cheek_s * 1.1 + lip_s + sym_s * 1.4 + brow_s + fore_s) / 9.2,
+        (eye_s * 1.4 + nose_s + jaw_s * 1.3 + cheek_s * 1.1 + lip_s + sym_s * 1.2 + brow_s + fore_s) / 9.0,
         1
     )
     overall = min(9.9, max(2.0, overall))
