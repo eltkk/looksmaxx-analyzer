@@ -4,8 +4,8 @@ import httpx
 from typing import Optional
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-PRIMARY_MODEL   = "google/gemini-2.0-flash-lite-001"
-FALLBACK_MODEL  = "google/gemini-2.0-flash-lite"
+PRIMARY_MODEL   = "z-ai/glm-4.5-air:free"
+FALLBACK_MODEL  = "google/gemini-2.0-flash-exp:free"
 
 SYSTEM_PROMPT = """Ты эксперт по лусмаксингу и анализу лица. Ты даёшь честные, детальные оценки по реальным метрикам.
 Отвечай строго в JSON формате без лишнего текста. Используй только русский язык в описаниях."""
@@ -151,7 +151,7 @@ def get_analysis(metrics: dict, height: Optional[str], weight: Optional[str], na
         age=age,
     )
 
-    models = [PRIMARY_MODEL, FALLBACK_MODEL, "openai/gpt-4o-mini"]
+    models = [PRIMARY_MODEL, FALLBACK_MODEL, "meta-llama/llama-3.3-70b-instruct:free"]
     last_err = None
 
     for model in models:
