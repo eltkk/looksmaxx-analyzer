@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Scan, ChevronRight, Zap, Shield } from "lucide-react";
+import { Upload, Scan, ChevronRight, Zap, Shield, AlertCircle, RefreshCw } from "lucide-react";
 
 const NATIONALITIES = [
   "Русский", "Украинец", "Белорус", "Казах", "Узбек",
@@ -18,6 +18,17 @@ const RATING_EXAMPLES = [
   { tier: "SUB5", color: "text-red-400", desc: "Нижний тир" },
 ];
 
+const STEPS = [
+  "Определяем лицо на фото...",
+  "Анализируем симметрию лица...",
+  "Измеряем кантальный тилт...",
+  "Оцениваем пропорции трётей...",
+  "Анализируем челюсть и скулы...",
+  "Изучаем черты лица...",
+  "Рассчитываем итоговый тир...",
+  "Формируем рекомендации...",
+];
+
 export default function HomePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +40,29 @@ export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [analyzeStep, setAnalyzeStep] = useState(0);
+  const [analyzeProgress, setAnalyzeProgress] = useState(0);
+  const [analyzeError, setAnalyzeError] = useState("");
+
+  useEffect(() => {
+    if (!loading) return;
+    setAnalyzeStep(0);
+    setAnalyzeProgress(0);
+    setAnalyzeError("");
+
+    const stepInterval = setInterval(() => {
+      setAnalyzeStep((s) => (s < STEPS.length - 1 ? s + 1 : s));
+    }, 2000);
+
+    const progressInterval = setInterval(() => {
+      setAnalyzeProgress((p) => (p < 95 ? p + 1 : p));
+    }, 170);
+
+    return () => {
+      clearInterval(stepInterval);
+      clearInterval(progressInterval);
+    };
+  }, [loading]);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -70,8 +104,6 @@ export default function HomePage() {
     setLoading(true);
     setError("");
 
-    router.push("/analyzing");
-
     try {
       const formData = new FormData();
       formData.append("photo", photo);
@@ -84,22 +116,102 @@ export default function HomePage() {
         body: formData,
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Ошибка анализа");
+        throw new Error(data.detail || data.error || "Ошибка анализа");
       }
 
-      const data = await res.json();
       router.push(`/results/${data.id}`);
     } catch (err) {
-      router.push("/");
-      setError(err instanceof Error ? err.message : "Что-то пошло не так");
-      setLoading(false);
+      const msg = err instanceof Error ? err.message : "Что-то пошло не так. Попробуй другое фото.";
+      setAnalyzeError(msg);
     }
+  };
+
+  const handleRetry = () => {
+    setLoading(false);
+    setAnalyzeError("");
+    setAnalyzeProgress(0);
+    setAnalyzeStep(0);
   };
 
   return (
     <div className="min-h-screen bg-[#09090b]">
+      {/* Analyzing overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-[#09090b] z-50 flex flex-col items-center justify-center px-6">
+          {analyzeError ? (
+            <>
+              <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-6">
+                <AlertCircle className="w-10 h-10 text-red-400" />
+              </div>
+              <h2 className="text-white text-xl font-semibold mb-3">Ошибка анализа</h2>
+              <p className="text-red-400 text-sm mb-8 max-w-sm text-center leading-relaxed">{analyzeError}</p>
+              <button
+                onClick={handleRetry}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Попробовать снова
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="relative w-48 h-48 mb-12">
+                <div className="absolute inset-0 rounded-full border border-purple-500/20" />
+                <div className="absolute inset-2 rounded-full border border-purple-500/30" />
+                <div className="absolute inset-4 rounded-full border border-purple-500/40" />
+                <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "2s" }}>
+                  <circle cx="96" cy="96" r="88" fill="none" stroke="url(#grad)" strokeWidth="2" strokeDasharray="120 440" strokeLinecap="round" />
+                  <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0" />
+                      <stop offset="100%" stopColor="#a855f7" stopOpacity="1" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "3s", animationDirection: "reverse" }}>
+                  <circle cx="96" cy="96" r="70" fill="none" stroke="url(#grad2)" strokeWidth="1" strokeDasharray="60 380" strokeLinecap="round" />
+                  <defs>
+                    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
+                      <stop offset="100%" stopColor="#6366f1" stopOpacity="1" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+                    <Scan className="w-9 h-9 text-purple-400" />
+                  </div>
+                </div>
+                {["top-0 left-0 border-t-2 border-l-2 rounded-tl-lg", "top-0 right-0 border-t-2 border-r-2 rounded-tr-lg", "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-lg", "bottom-0 right-0 border-b-2 border-r-2 rounded-br-lg"].map((cls, i) => (
+                  <div key={i} className={`absolute w-5 h-5 border-purple-500 ${cls}`} />
+                ))}
+              </div>
+              <div className="text-center mb-8">
+                <h2 className="text-white text-xl font-semibold mb-2">Анализируем лицо</h2>
+                <p className="text-purple-400 text-sm min-h-[20px] transition-all duration-500">
+                  {STEPS[analyzeStep]}
+                </p>
+              </div>
+              <div className="w-64">
+                <div className="flex justify-between text-xs text-zinc-600 mb-2">
+                  <span>Прогресс</span>
+                  <span>{analyzeProgress}%</span>
+                </div>
+                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full transition-all duration-300"
+                    style={{ width: `${analyzeProgress}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Nav */}
       <nav className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -130,7 +242,6 @@ export default function HomePage() {
       {/* Upload Form */}
       <section className="max-w-2xl mx-auto px-6 pb-20">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Drop Zone */}
           <div
             onClick={() => fileInputRef.current?.click()}
             onDrop={onDrop}
@@ -149,14 +260,9 @@ export default function HomePage() {
               className="hidden"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             />
-
             {photoPreview ? (
               <div className="relative">
-                <img
-                  src={photoPreview}
-                  alt="Preview"
-                  className="w-full max-h-80 object-contain bg-zinc-950"
-                />
+                <img src={photoPreview} alt="Preview" className="w-full max-h-80 object-contain bg-zinc-950" />
                 <div className="absolute inset-0 scan-overlay pointer-events-none" />
                 <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm text-purple-400 flex items-center gap-1.5">
                   <Upload className="w-3.5 h-3.5" />
@@ -174,7 +280,6 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Extra Fields */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-zinc-400 mb-2">Рост (см)</label>
@@ -231,18 +336,9 @@ export default function HomePage() {
                 : "bg-zinc-800 text-zinc-500 cursor-not-allowed",
             ].join(" ")}
           >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Анализируем лицо...
-              </>
-            ) : (
-              <>
-                <Scan className="w-5 h-5" />
-                Анализировать лицо
-                <ChevronRight className="w-4 h-4" />
-              </>
-            )}
+            <Scan className="w-5 h-5" />
+            Анализировать лицо
+            <ChevronRight className="w-4 h-4" />
           </button>
 
           <p className="text-center text-zinc-600 text-xs">
