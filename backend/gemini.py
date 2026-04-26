@@ -3,9 +3,8 @@ import json
 import httpx
 from typing import Optional
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-PRIMARY_MODEL   = "z-ai/glm-4.5-air:free"
-FALLBACK_MODEL  = "google/gemini-2.0-flash-exp:free"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+MODEL = "gemini-2.0-flash"
 
 SYSTEM_PROMPT = """Ты эксперт по лусмаксингу и анализу лица. Ты даёшь честные, детальные оценки по реальным метрикам.
 Отвечай строго в JSON формате без лишнего текста. Используй только русский язык в описаниях."""
@@ -112,27 +111,6 @@ SUB3 → SUB5 → LTN → MTN → HTN → CHAD → TRUE CHAD → ADAM
 }}"""
 
 
-def _call_model(model: str, prompt: str) -> dict:
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://facerank.app",
-    }
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.7,
-        "max_tokens": 2000,
-    }
-    with httpx.Client(timeout=60) as client:
-        resp = client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
-        resp.raise_for_status()
-        return resp.json()
-
-
 def get_analysis(metrics: dict, height: Optional[str], weight: Optional[str], nationality: Optional[str], ethnicity: str, age: int) -> dict:
     prompt = USER_PROMPT_TEMPLATE.format(
         canthal_tilt=metrics.get("canthal_tilt", 0),
@@ -151,25 +129,22 @@ def get_analysis(metrics: dict, height: Optional[str], weight: Optional[str], na
         age=age,
     )
 
-    models = [PRIMARY_MODEL, FALLBACK_MODEL, "meta-llama/llama-3.3-70b-instruct:free"]
-    last_err = None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2000},
+    }
 
-    for model in models:
-        try:
-            response = _call_model(model, prompt)
-            content = response["choices"][0]["message"]["content"].strip()
+    with httpx.Client(timeout=60) as client:
+        resp = client.post(url, json=payload)
+        resp.raise_for_status()
+        data = resp.json()
 
-            # Strip markdown code blocks if present
-            if content.startswith("```"):
-                lines = content.split("\n")
-                content = "\n".join(lines[1:-1] if lines[-1] == "```" else lines[1:])
+    content = data["candidates"][0]["content"]["parts"][0]["text"].strip()
 
-            return json.loads(content)
-        except httpx.HTTPError as e:
-            last_err = e
-            continue
-        except json.JSONDecodeError:
-            last_err = ValueError("Некорректный JSON от модели")
-            continue
+    if content.startswith("```"):
+        lines = content.split("\n")
+        content = "\n".join(lines[1:-1] if lines[-1] == "```" else lines[1:])
 
-    raise RuntimeError(f"Все модели недоступны: {last_err}")
+    return json.loads(content)
