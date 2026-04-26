@@ -4,8 +4,6 @@ Web app that analyzes facial geometry using computer vision and scores facial fe
 
 **Live:** [perceptive-insight-production-be1a.up.railway.app](https://perceptive-insight-production-be1a.up.railway.app)
 
----
-
 ## What it does
 
 Upload a photo → get a detailed breakdown of 8 facial zones with scores, tier rating, and improvement advice.
@@ -19,7 +17,6 @@ The analysis pipeline:
 
 No external AI API calls — everything runs on-server.
 
----
 
 ## Tech stack
 
@@ -40,7 +37,6 @@ No external AI API calls — everything runs on-server.
 - Docker (multi-stage builds for both services)
 - Railway (separate frontend + backend deployments)
 
----
 
 ## Architecture
 
@@ -63,7 +59,6 @@ Browser
                                 └── in-memory store → return result
 ```
 
----
 
 ## Local development
 
@@ -91,7 +86,6 @@ docker compose up
 
 App runs at `http://localhost:3000`.
 
----
 
 ## Project structure
 
@@ -114,7 +108,6 @@ App runs at `http://localhost:3000`.
     └── Dockerfile
 ```
 
----
 
 ## Key metrics computed
 
@@ -129,7 +122,6 @@ App runs at `http://localhost:3000`.
 | Mouth-to-nose ratio | Mouth width / nose width |
 | IPD ratio | Inter-pupillary distance / face width |
 
----
 
 ## Deployment
 
