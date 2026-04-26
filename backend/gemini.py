@@ -165,7 +165,7 @@ def get_analysis(metrics: dict, height: Optional[str], weight: Optional[str], na
                 content = "\n".join(lines[1:-1] if lines[-1] == "```" else lines[1:])
 
             return json.loads(content)
-        except (httpx.HTTPStatusError, httpx.TimeoutException) as e:
+        except httpx.HTTPError as e:
             last_err = e
             continue
         except json.JSONDecodeError:

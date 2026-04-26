@@ -52,7 +52,7 @@ async def analyze(
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Ошибка анализа. Попробуй другое фото.")
+        raise HTTPException(status_code=500, detail=f"Ошибка анализа: {type(e).__name__}: {e}")
 
     result["id"] = result_id
     if height:
