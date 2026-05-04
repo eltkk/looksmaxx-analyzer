@@ -93,6 +93,7 @@ def compute_metrics(landmarks, img_w: int, img_h: int) -> dict:
     mouth_width = _dist(mouth_left, mouth_right)
     mouth_height = _dist(mouth_top, mouth_bot)
     mouth_to_nose = mouth_width / nose_width if nose_width > 0 else 0
+    mouth_width_ratio = mouth_width / face_width if face_width > 0 else 0
 
     # Brow dimensions
     brow_width_l = _dist(brow_left_outer, brow_left_inner)
@@ -101,6 +102,7 @@ def compute_metrics(landmarks, img_w: int, img_h: int) -> dict:
     brow_height_l = abs(brow_left_top[1] - left_eye_top[1])
     brow_height_r = abs(brow_right_top[1] - right_eye_top[1])
     brow_arch = (brow_height_l + brow_height_r) / 2
+    brow_width_ratio = brow_width_avg / face_width if face_width > 0 else 0
 
     # Symmetry — compare left vs right half distances
     sym_points = [
@@ -124,8 +126,10 @@ def compute_metrics(landmarks, img_w: int, img_h: int) -> dict:
         "jaw_width_ratio": round(jaw_to_cheek, 3),
         "nose_ratio": round(nose_ratio, 3),
         "mouth_to_nose_ratio": round(mouth_to_nose, 3),
+        "mouth_width_ratio": round(mouth_width_ratio, 3),
         "eye_ratio": round(eye_ratio, 3),
         "brow_arch_mm": round(brow_arch, 1),
+        "brow_width_ratio": round(brow_width_ratio, 3),
         "fwhr": round(fwhr, 3),
         "symmetry": symmetry,
         "ipd_ratio": round(ipd / face_width, 3) if face_width > 0 else 0,

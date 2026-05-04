@@ -84,24 +84,23 @@ def _describe_jaw(ratio: float) -> tuple[str, str]:
 
 
 def _describe_nose(ratio: float) -> tuple[str, str]:
-    # nose_ratio = nose_width / face_width, typical 0.25-0.40
-    if 0.25 <= ratio <= 0.35:
+    # nose_ratio = nose_width / face_width, ideal 0.27-0.33
+    if 0.27 <= ratio <= 0.33:
         return ("Ширина носа пропорциональна ширине лица — нос гармонично вписывается в черты.",
                 "Эта зона является сильной стороной — ринопластика не требуется.")
-    if ratio < 0.25:
+    if ratio < 0.27:
         return ("Нос узкий относительно ширины лица — утончённый вид, привлекательный в большинстве стандартов.",
                 "Причёска и оправа очков могут дополнительно подчеркнуть эту черту.")
     return ("Нос широкий относительно ширины лица — выходит за пределы оптимального диапазона.",
             "Снижение жира в лице немного сужает носовую область. Контуринг причёской помогает визуально.")
 
 
-def _describe_lips(ratio: float) -> tuple[str, str]:
-    # mouth_to_nose = mouth_width / nose_width, typical 1.2-1.8
-    if 1.25 <= ratio <= 1.65:
-        return ("Соотношение губ к носу идеальное — губы пропорционально соответствуют нижней зоне лица.",
+def _describe_lips(mouth_to_nose: float, mouth_width_ratio: float) -> tuple[str, str]:
+    if 1.30 <= mouth_to_nose <= 1.60 and 0.40 <= mouth_width_ratio <= 0.55:
+        return ("Губы хорошо пропорциональны — ширина и соотношение к носу в идеальном диапазоне.",
                 "Поддерживай нормальный вес — это сохраняет объём и форму губ.")
-    if ratio < 1.25:
-        return ("Губы узкие относительно носа — нижняя зона выглядит немного сжатой.",
+    if mouth_to_nose < 1.30 or mouth_width_ratio < 0.40:
+        return ("Губы узкие относительно нижней зоны лица — рот выглядит немного сжатым.",
                 "Гидратация и правильный мьюинг постепенно улучшают эту область.")
     return ("Губы широкие относительно носа — нижняя треть лица доминирует по ширине.",
             "Щетина и определённые причёски могут скорректировать визуальное восприятие.")
@@ -143,25 +142,30 @@ def get_analysis(
     ethnicity: str,
     age: int,
 ) -> dict:
-    canthal  = metrics.get("canthal_tilt", 0)
-    symmetry = metrics.get("symmetry", 0)
-    jaw      = metrics.get("jaw_width_ratio", 0)
-    nose     = metrics.get("nose_ratio", 0)
-    mouth    = metrics.get("mouth_to_nose_ratio", 0)
-    eye      = metrics.get("eye_ratio", 0)
-    fwhr     = metrics.get("fwhr", 0)
-    ipd      = metrics.get("ipd_ratio", 0)
-    thirds   = metrics.get("facial_thirds", "33/33/33")
+    canthal      = metrics.get("canthal_tilt", 0)
+    symmetry     = metrics.get("symmetry", 0)
+    jaw          = metrics.get("jaw_width_ratio", 0)
+    nose         = metrics.get("nose_ratio", 0)
+    mouth        = metrics.get("mouth_to_nose_ratio", 0)
+    mouth_w      = metrics.get("mouth_width_ratio", 0)
+    eye          = metrics.get("eye_ratio", 0)
+    fwhr         = metrics.get("fwhr", 0)
+    ipd          = metrics.get("ipd_ratio", 0)
+    thirds       = metrics.get("facial_thirds", "33/33/33")
+    brow_w       = metrics.get("brow_width_ratio", 0)
+    face_h       = metrics.get("face_height_px", 1)
+    brow_arch_px = metrics.get("brow_arch_mm", 0)
+    brow_arch_r  = brow_arch_px / face_h if face_h > 0 else 0
 
     # Per-zone scores with correct ranges for these MediaPipe landmarks
     cant_s  = round(_score_canthal(canthal), 1)
     eye_s   = round((_score_range(eye, 0.25, 0.38) + cant_s + _score_range(ipd, 0.38, 0.52)) / 3, 1)
-    nose_s  = round(_score_range(nose, 0.25, 0.35), 1)
+    nose_s  = round(_score_range(nose, 0.27, 0.33), 1)
     jaw_s   = round((_score_range(jaw, 0.95, 1.12) + _score_range(fwhr, 0.60, 0.80)) / 2, 1)
     cheek_s = round(_score_range(fwhr, 0.62, 0.78), 1)
-    lip_s   = round(_score_range(mouth, 1.25, 1.65), 1)
+    lip_s   = round((_score_range(mouth, 1.30, 1.60) + _score_range(mouth_w, 0.40, 0.55)) / 2, 1)
     sym_s   = round(_score_symmetry(symmetry), 1)
-    brow_s  = round(cant_s, 1)
+    brow_s  = round((_score_range(brow_w, 0.18, 0.26) + _score_range(brow_arch_r, 0.03, 0.07) + cant_s) / 3, 1)
     fore_s  = round(_score_range(float(thirds.split("/")[0]) if "/" in thirds else 33, 28, 38), 1)
 
     overall = round(
@@ -174,7 +178,7 @@ def get_analysis(
     eye_desc, eye_adv   = _describe_eyes(eye)
     nose_desc, nose_adv = _describe_nose(nose)
     jaw_desc, jaw_adv   = _describe_jaw(jaw)
-    lip_desc, lip_adv   = _describe_lips(mouth)
+    lip_desc, lip_adv   = _describe_lips(mouth, mouth_w)
     sym_desc, sym_adv   = _describe_symmetry(symmetry)
     cant_desc, cant_adv = _describe_canthal(canthal)
     fore_desc, fore_adv = _describe_forehead(thirds)
@@ -215,7 +219,7 @@ def get_analysis(
             {"name": "Нос",                  "score": nose_s, "rating": _score_to_tier(nose_s), "description": nose_desc, "advice": nose_adv},
             {"name": "Челюсть и подбородок", "score": jaw_s,  "rating": _score_to_tier(jaw_s),  "description": jaw_desc,  "advice": jaw_adv},
             {"name": "Скулы",                "score": cheek_s,"rating": _score_to_tier(cheek_s),"description": "Скуловая зона определяет верхнюю ширину лица и создаёт треугольник привлекательности.", "advice": "Снижение процента жира — главный инструмент для выраженности скул."},
-            {"name": "Брови",                "score": brow_s, "rating": _score_to_tier(brow_s), "description": cant_desc, "advice": cant_adv},
+            {"name": "Брови",                "score": brow_s, "rating": _score_to_tier(brow_s), "description": cant_desc + " Оценка учитывает форму и арку — густота бровей по геометрии лица не определяется.", "advice": cant_adv},
             {"name": "Губы",                 "score": lip_s,  "rating": _score_to_tier(lip_s),  "description": lip_desc,  "advice": lip_adv},
             {"name": "Лоб",                  "score": fore_s, "rating": _score_to_tier(fore_s), "description": fore_desc, "advice": fore_adv},
             {"name": "Симметрия",            "score": sym_s,  "rating": _score_to_tier(sym_s),  "description": sym_desc,  "advice": sym_adv},
