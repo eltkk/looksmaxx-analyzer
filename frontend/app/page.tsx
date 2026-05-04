@@ -123,7 +123,7 @@ export default function HomePage() {
       }
 
       if (photoPreview) {
-        sessionStorage.setItem("facerank_photo", photoPreview);
+        sessionStorage.setItem("facet_photo", photoPreview);
       }
 
       setAnalyzeProgress(100);
@@ -224,7 +224,7 @@ export default function HomePage() {
           <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
             <Scan className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-white text-lg tracking-tight">FaceRank</span>
+          <span className="font-bold text-white text-lg tracking-tight">Facet</span>
         </div>
         <div className="text-sm text-zinc-500">Бесплатно</div>
       </nav>
@@ -397,7 +397,7 @@ export default function HomePage() {
       <footer className="border-t border-white/5 px-6 py-8 text-center text-zinc-600 text-sm">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Scan className="w-4 h-4" />
-          <span className="font-semibold text-zinc-400">FaceRank</span>
+          <span className="font-semibold text-zinc-400">Facet</span>
         </div>
         <p>AI-анализ лица · Только для образовательных целей</p>
       </footer>

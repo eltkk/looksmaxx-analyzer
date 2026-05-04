@@ -129,10 +129,10 @@ export default function ResultsPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const photo = sessionStorage.getItem("facerank_photo");
+    const photo = sessionStorage.getItem("facet_photo");
     if (photo) {
       setPhotoPreview(photo);
-      sessionStorage.removeItem("facerank_photo");
+      sessionStorage.removeItem("facet_photo");
     }
   }, []);
 
@@ -221,7 +221,7 @@ export default function ResultsPage() {
           <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center">
             <Scan className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="font-bold text-white tracking-tight">FaceRank</span>
+          <span className="font-bold text-white tracking-tight">Facet</span>
         </div>
         <button
           onClick={handleShare}

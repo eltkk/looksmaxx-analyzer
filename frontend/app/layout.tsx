@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FaceRank — AI анализ лица",
+  title: "Facet — AI анализ лица",
   description: "Загрузи фото и получи детальный анализ черт лица по шкале лусмаксинга. ИИ оценивает каждую часть лица и даёт персональные советы.",
 };
 
