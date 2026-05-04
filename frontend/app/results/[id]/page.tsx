@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Scan, ArrowLeft, ChevronDown, ChevronUp, Lightbulb, Trophy } from "lucide-react";
+import {
+  Scan, ArrowLeft, ChevronDown, ChevronUp, Lightbulb, Trophy,
+  Share2, Check, Eye, Crosshair, Hexagon, Diamond, Minus, Smile,
+  ArrowUp, Sliders, type LucideIcon,
+} from "lucide-react";
 
 interface FacePart {
   name: string;
@@ -69,8 +73,20 @@ const SCORE_BAR = (score: number) => {
   return "bg-red-400";
 };
 
+const ZONE_ICONS: Record<string, LucideIcon> = {
+  "Глаза": Eye,
+  "Нос": Crosshair,
+  "Челюсть и подбородок": Hexagon,
+  "Скулы": Diamond,
+  "Брови": Minus,
+  "Губы": Smile,
+  "Лоб": ArrowUp,
+  "Симметрия": Sliders,
+};
+
 function FacePartCard({ part, index }: { part: FacePart; index: number }) {
   const [open, setOpen] = useState(false);
+  const Icon = ZONE_ICONS[part.name] ?? Scan;
 
   return (
     <div
@@ -81,7 +97,10 @@ function FacePartCard({ part, index }: { part: FacePart; index: number }) {
         onClick={() => setOpen(!open)}
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+            <Icon className={`w-4 h-4 ${SCORE_COLOR(part.score)}`} />
+          </div>
           <div className="text-left">
             <div className="text-white font-semibold">{part.name}</div>
             <div className={`text-sm font-bold ${SCORE_COLOR(part.score)}`}>{part.rating}</div>
@@ -123,6 +142,17 @@ export default function ResultsPage() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [displayScore, setDisplayScore] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const photo = sessionStorage.getItem("facerank_photo");
+    if (photo) {
+      setPhotoPreview(photo);
+      sessionStorage.removeItem("facerank_photo");
+    }
+  }, []);
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -140,6 +170,28 @@ export default function ResultsPage() {
 
     if (params.id) fetchResult();
   }, [params.id]);
+
+  useEffect(() => {
+    if (!result) return;
+    const target = result.overall_score;
+    const duration = 1200;
+    const fps = 60;
+    const steps = duration / (1000 / fps);
+    const increment = target / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current = Math.min(current + increment, target);
+      setDisplayScore(parseFloat(current.toFixed(1)));
+      if (current >= target) clearInterval(timer);
+    }, 1000 / fps);
+    return () => clearInterval(timer);
+  }, [result]);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (loading) {
     return (
@@ -189,12 +241,27 @@ export default function ResultsPage() {
           </div>
           <span className="font-bold text-white tracking-tight">FaceRank</span>
         </div>
-        <div className="w-16" />
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm"
+        >
+          {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
+          <span className={copied ? "text-green-400" : ""}>{copied ? "Скопировано" : "Поделиться"}</span>
+        </button>
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-12 space-y-8">
         {/* Overall Result */}
         <div className={`rounded-3xl border p-8 text-center ${tierBg} animate-fade-in-up`}>
+          {photoPreview && (
+            <div className="flex justify-center mb-5">
+              <img
+                src={photoPreview}
+                alt="Твоё фото"
+                className="w-20 h-20 rounded-full object-cover border-2 border-white/10"
+              />
+            </div>
+          )}
           <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm mb-4">
             <Trophy className="w-4 h-4" />
             Итоговый тир
@@ -203,14 +270,13 @@ export default function ResultsPage() {
             {result.overall_tier}
           </div>
           <div className="flex items-center justify-center gap-3 mb-6">
-            <span className={`text-4xl font-bold ${SCORE_COLOR(result.overall_score)}`}>
-              {result.overall_score.toFixed(1)}
+            <span className={`text-4xl font-bold tabular-nums ${SCORE_COLOR(result.overall_score)}`}>
+              {displayScore.toFixed(1)}
             </span>
             <span className="text-zinc-600 text-xl">/ 10</span>
           </div>
           <p className="text-zinc-300 leading-relaxed max-w-lg mx-auto">{result.summary}</p>
 
-          {/* Meta */}
           {(result.height || result.weight || result.nationality) && (
             <div className="flex items-center justify-center gap-4 mt-6 text-sm text-zinc-500">
               {result.height && <span>{result.height} см</span>}

@@ -2,12 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Scan, ChevronRight, Zap, Shield, AlertCircle, RefreshCw } from "lucide-react";
-
-const NATIONALITIES = [
-  "Русский", "Украинец", "Белорус", "Казах", "Узбек",
-  "Европеец", "Американец", "Азиат", "Латиноамериканец", "Африканец", "Ближневосточный",
-];
+import { Upload, Scan, ChevronRight, Zap, Shield, AlertCircle, RefreshCw, Info } from "lucide-react";
 
 const RATING_EXAMPLES = [
   { tier: "ADAM", color: "text-yellow-300", desc: "Топ 0.1% — легендарный" },
@@ -36,7 +31,6 @@ export default function HomePage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [nationality, setNationality] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,7 +49,7 @@ export default function HomePage() {
     }, 2000);
 
     const progressInterval = setInterval(() => {
-      setAnalyzeProgress((p) => (p < 95 ? p + 1 : p));
+      setAnalyzeProgress((p) => (p < 90 ? p + 1 : p));
     }, 170);
 
     return () => {
@@ -109,7 +103,6 @@ export default function HomePage() {
       formData.append("photo", photo);
       if (height) formData.append("height", height);
       if (weight) formData.append("weight", weight);
-      if (nationality) formData.append("nationality", nationality);
 
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -122,6 +115,12 @@ export default function HomePage() {
         throw new Error(data.detail || data.error || "Ошибка анализа");
       }
 
+      if (photoPreview) {
+        sessionStorage.setItem("facerank_photo", photoPreview);
+      }
+
+      setAnalyzeProgress(100);
+      await new Promise((r) => setTimeout(r, 400));
       router.push(`/results/${data.id}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Что-то пошло не так. Попробуй другое фото.";
@@ -280,7 +279,14 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex items-start gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3">
+            <Info className="w-4 h-4 text-zinc-500 flex-shrink-0 mt-0.5" />
+            <p className="text-zinc-500 text-xs leading-relaxed">
+              Для точного анализа: смотри прямо в камеру · нейтральное выражение · хорошее освещение · без очков и головных уборов
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-zinc-400 mb-2">Рост (см)</label>
               <input
@@ -304,19 +310,6 @@ export default function HomePage() {
                 max={200}
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors"
               />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-2">Национальность</label>
-              <select
-                value={nationality}
-                onChange={(e) => setNationality(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-              >
-                <option value="">Любая</option>
-                {NATIONALITIES.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
             </div>
           </div>
 
