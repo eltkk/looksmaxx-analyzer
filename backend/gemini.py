@@ -163,9 +163,9 @@ def get_analysis(
     nose_s  = round(_score_range(nose, 0.27, 0.33), 1)
     jaw_s   = round((_score_range(jaw, 0.95, 1.12) + _score_range(fwhr, 0.60, 0.80)) / 2, 1)
     cheek_s = round(_score_range(fwhr, 0.62, 0.78), 1)
-    lip_s   = round(_score_range(mouth, 1.25, 1.65), 1)
+    lip_s   = round(_score_range(mouth, 1.10, 1.75, floor=4.0), 1)
     sym_s   = round(_score_symmetry(symmetry), 1)
-    brow_s  = round((_score_range(brow_w, 0.15, 0.28) + cant_s) / 2, 1)
+    brow_s  = round(_score_range(brow_w, 0.14, 0.30, floor=4.5), 1)
     fore_s  = round(_score_range(float(thirds.split("/")[0]) if "/" in thirds else 33, 28, 38), 1)
 
     overall = round(
