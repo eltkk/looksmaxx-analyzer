@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Scan, ArrowLeft, ChevronDown, ChevronUp, Lightbulb, Trophy,
-  Share2, Check, Eye, Crosshair, Hexagon, Diamond, Minus, Smile,
-  ArrowUp, Sliders, type LucideIcon,
+  Share2, Check,
 } from "lucide-react";
 
 interface FacePart {
@@ -73,20 +72,8 @@ const SCORE_BAR = (score: number) => {
   return "bg-red-400";
 };
 
-const ZONE_ICONS: Record<string, LucideIcon> = {
-  "Глаза": Eye,
-  "Нос": Crosshair,
-  "Челюсть и подбородок": Hexagon,
-  "Скулы": Diamond,
-  "Брови": Minus,
-  "Губы": Smile,
-  "Лоб": ArrowUp,
-  "Симметрия": Sliders,
-};
-
 function FacePartCard({ part, index }: { part: FacePart; index: number }) {
   const [open, setOpen] = useState(false);
-  const Icon = ZONE_ICONS[part.name] ?? Scan;
 
   return (
     <div
@@ -97,14 +84,9 @@ function FacePartCard({ part, index }: { part: FacePart; index: number }) {
         onClick={() => setOpen(!open)}
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-            <Icon className={`w-4 h-4 ${SCORE_COLOR(part.score)}`} />
-          </div>
-          <div className="text-left">
-            <div className="text-white font-semibold">{part.name}</div>
-            <div className={`text-sm font-bold ${SCORE_COLOR(part.score)}`}>{part.rating}</div>
-          </div>
+        <div className="text-left">
+          <div className="text-white font-semibold">{part.name}</div>
+          <div className={`text-sm font-bold ${SCORE_COLOR(part.score)}`}>{part.rating}</div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
