@@ -95,12 +95,12 @@ def _describe_nose(ratio: float) -> tuple[str, str]:
             "Снижение жира в лице немного сужает носовую область. Контуринг причёской помогает визуально.")
 
 
-def _describe_lips(mouth_to_nose: float, mouth_width_ratio: float) -> tuple[str, str]:
-    if 1.30 <= mouth_to_nose <= 1.60 and 0.40 <= mouth_width_ratio <= 0.55:
-        return ("Губы хорошо пропорциональны — ширина и соотношение к носу в идеальном диапазоне.",
+def _describe_lips(ratio: float) -> tuple[str, str]:
+    if 1.25 <= ratio <= 1.65:
+        return ("Соотношение губ к носу идеальное — губы пропорционально соответствуют нижней зоне лица.",
                 "Поддерживай нормальный вес — это сохраняет объём и форму губ.")
-    if mouth_to_nose < 1.30 or mouth_width_ratio < 0.40:
-        return ("Губы узкие относительно нижней зоны лица — рот выглядит немного сжатым.",
+    if ratio < 1.25:
+        return ("Губы узкие относительно носа — нижняя зона выглядит немного сжатой.",
                 "Гидратация и правильный мьюинг постепенно улучшают эту область.")
     return ("Губы широкие относительно носа — нижняя треть лица доминирует по ширине.",
             "Щетина и определённые причёски могут скорректировать визуальное восприятие.")
@@ -163,9 +163,9 @@ def get_analysis(
     nose_s  = round(_score_range(nose, 0.27, 0.33), 1)
     jaw_s   = round((_score_range(jaw, 0.95, 1.12) + _score_range(fwhr, 0.60, 0.80)) / 2, 1)
     cheek_s = round(_score_range(fwhr, 0.62, 0.78), 1)
-    lip_s   = round((_score_range(mouth, 1.30, 1.60) + _score_range(mouth_w, 0.40, 0.55)) / 2, 1)
+    lip_s   = round(_score_range(mouth, 1.25, 1.65), 1)
     sym_s   = round(_score_symmetry(symmetry), 1)
-    brow_s  = round((_score_range(brow_w, 0.18, 0.26) + _score_range(brow_arch_r, 0.03, 0.07) + cant_s) / 3, 1)
+    brow_s  = round((_score_range(brow_w, 0.15, 0.28) + cant_s) / 2, 1)
     fore_s  = round(_score_range(float(thirds.split("/")[0]) if "/" in thirds else 33, 28, 38), 1)
 
     overall = round(
@@ -178,7 +178,7 @@ def get_analysis(
     eye_desc, eye_adv   = _describe_eyes(eye)
     nose_desc, nose_adv = _describe_nose(nose)
     jaw_desc, jaw_adv   = _describe_jaw(jaw)
-    lip_desc, lip_adv   = _describe_lips(mouth, mouth_w)
+    lip_desc, lip_adv   = _describe_lips(mouth)
     sym_desc, sym_adv   = _describe_symmetry(symmetry)
     cant_desc, cant_adv = _describe_canthal(canthal)
     fore_desc, fore_adv = _describe_forehead(thirds)
