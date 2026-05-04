@@ -22,11 +22,11 @@ def _score_symmetry(sym: float) -> float:
 
 def _score_range(value: float, ideal_min: float, ideal_max: float, floor: float = 2.0) -> float:
     if ideal_min <= value <= ideal_max:
-        return 7.0
+        return 8.0
     span = ideal_max - ideal_min
     distance = max(0, ideal_min - value, value - ideal_max)
     penalty = (distance / span) * 12.0
-    return max(floor, 7.0 - penalty)
+    return max(floor, 8.0 - penalty)
 
 
 def _score_to_tier(score: float) -> str:
