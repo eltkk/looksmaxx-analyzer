@@ -13,6 +13,11 @@ const RATING_EXAMPLES = [
   { tier: "SUB5", color: "text-red-400", desc: "Нижний тир" },
 ];
 
+const NATIONALITIES = [
+  "Русский", "Украинец", "Белорус", "Казах", "Узбек",
+  "Европеец", "Американец", "Азиат", "Латиноамериканец", "Африканец", "Ближневосточный",
+];
+
 const STEPS = [
   "Определяем лицо на фото...",
   "Анализируем симметрию лица...",
@@ -31,6 +36,7 @@ export default function HomePage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [nationality, setNationality] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -103,6 +109,7 @@ export default function HomePage() {
       formData.append("photo", photo);
       if (height) formData.append("height", height);
       if (weight) formData.append("weight", weight);
+      if (nationality) formData.append("nationality", nationality);
 
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -286,7 +293,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-zinc-400 mb-2">Рост (см)</label>
               <input
@@ -310,6 +317,19 @@ export default function HomePage() {
                 max={200}
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors"
               />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-400 mb-2">Национальность</label>
+              <select
+                value={nationality}
+                onChange={(e) => setNationality(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+              >
+                <option value="">Любая</option>
+                {NATIONALITIES.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
             </div>
           </div>
 

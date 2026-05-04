@@ -134,6 +134,19 @@ def _describe_forehead(thirds: str) -> tuple[str, str]:
             "Причёски с чёлкой или горизонтальными линиями визуально уменьшают лоб.")
 
 
+def _ethnic_ranges(nationality: Optional[str]) -> dict:
+    nat = (nationality or "").lower()
+    if any(x in nat for x in ["азиат", "казах", "узбек"]):
+        return {"nose": (0.25, 0.36), "jaw": (0.88, 1.10), "eye": (0.20, 0.36), "fwhr": (0.62, 0.82)}
+    if "африканец" in nat:
+        return {"nose": (0.30, 0.42), "jaw": (0.92, 1.15), "eye": (0.25, 0.40), "fwhr": (0.60, 0.80)}
+    if "ближневосточный" in nat:
+        return {"nose": (0.28, 0.37), "jaw": (0.95, 1.15), "eye": (0.25, 0.38), "fwhr": (0.60, 0.80)}
+    if "латиноамерикан" in nat:
+        return {"nose": (0.27, 0.36), "jaw": (0.93, 1.13), "eye": (0.25, 0.38), "fwhr": (0.60, 0.80)}
+    return {"nose": (0.27, 0.33), "jaw": (0.95, 1.12), "eye": (0.25, 0.38), "fwhr": (0.60, 0.80)}
+
+
 def get_analysis(
     metrics: dict,
     height: Optional[str],
@@ -157,12 +170,12 @@ def get_analysis(
     brow_arch_px = metrics.get("brow_arch_mm", 0)
     brow_arch_r  = brow_arch_px / face_h if face_h > 0 else 0
 
-    # Per-zone scores with correct ranges for these MediaPipe landmarks
+    er = _ethnic_ranges(nationality)
     cant_s  = round(_score_canthal(canthal), 1)
-    eye_s   = round((_score_range(eye, 0.25, 0.38) + cant_s + _score_range(ipd, 0.38, 0.52)) / 3, 1)
-    nose_s  = round(_score_range(nose, 0.27, 0.33), 1)
-    jaw_s   = round((_score_range(jaw, 0.95, 1.12) + _score_range(fwhr, 0.60, 0.80)) / 2, 1)
-    cheek_s = round(_score_range(fwhr, 0.62, 0.78), 1)
+    eye_s   = round((_score_range(eye, *er["eye"]) + cant_s + _score_range(ipd, 0.38, 0.52)) / 3, 1)
+    nose_s  = round(_score_range(nose, *er["nose"]), 1)
+    jaw_s   = round((_score_range(jaw, *er["jaw"]) + _score_range(fwhr, *er["fwhr"])) / 2, 1)
+    cheek_s = round(_score_range(fwhr, er["fwhr"][0] + 0.02, er["fwhr"][1] - 0.02), 1)
     lip_s   = round(_score_range(mouth, 1.10, 1.75, floor=4.0), 1)
     sym_s   = round(_score_symmetry(symmetry), 1)
     brow_s  = round(_score_range(brow_w, 0.14, 0.30, floor=4.5), 1)
