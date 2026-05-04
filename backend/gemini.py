@@ -22,11 +22,11 @@ def _score_symmetry(sym: float) -> float:
 
 def _score_range(value: float, ideal_min: float, ideal_max: float, floor: float = 2.0) -> float:
     if ideal_min <= value <= ideal_max:
-        return 8.5
+        return 7.0
     span = ideal_max - ideal_min
     distance = max(0, ideal_min - value, value - ideal_max)
     penalty = (distance / span) * 12.0
-    return max(floor, 8.5 - penalty)
+    return max(floor, 7.0 - penalty)
 
 
 def _score_to_tier(score: float) -> str:
@@ -165,7 +165,7 @@ def get_analysis(
     fore_s  = round(_score_range(float(thirds.split("/")[0]) if "/" in thirds else 33, 28, 38), 1)
 
     overall = round(
-        (eye_s * 1.4 + nose_s + jaw_s * 1.3 + cheek_s * 1.1 + lip_s + sym_s * 1.2 + brow_s + fore_s) / 9.0,
+        (eye_s * 1.4 + nose_s + jaw_s * 1.3 + cheek_s * 1.1 + lip_s + sym_s * 1.2 + brow_s + fore_s) / 10.0,
         1
     )
     overall = min(9.9, max(2.0, overall))
