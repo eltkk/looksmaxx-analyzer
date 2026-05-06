@@ -6,7 +6,7 @@ import mediapipe as mp
 from typing import Optional
 
 from metrics import compute_metrics
-from gemini import get_analysis
+from scoring import get_analysis
 
 mp_face_mesh = mp.solutions.face_mesh
 
