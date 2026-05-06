@@ -76,5 +76,7 @@ def analyze_face(
             "facial_thirds": metrics_display.get("facial_thirds", metrics.get("facial_thirds", "")),
             "canthal_tilt": metrics_display.get("canthal_tilt", f"{metrics.get('canthal_tilt', 0)}°"),
             "jaw_width": metrics_display.get("jaw_width", str(metrics.get("jaw_width_ratio", ""))),
+            "face_shape": metrics_display.get("face_shape", metrics.get("face_shape", "Овал")),
+            "fatigue": metrics_display.get("fatigue", ""),
         },
     }

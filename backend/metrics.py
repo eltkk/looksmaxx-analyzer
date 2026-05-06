@@ -104,6 +104,45 @@ def compute_metrics(landmarks, img_w: int, img_h: int) -> dict:
     brow_arch = (brow_height_l + brow_height_r) / 2
     brow_width_ratio = brow_width_avg / face_width if face_width > 0 else 0
 
+    # Forehead width (temples)
+    forehead_left  = _pt(lm, 54,  img_w, img_h)
+    forehead_right = _pt(lm, 284, img_w, img_h)
+    forehead_width = _dist(forehead_left, forehead_right)
+
+    # EAR (Eye Aspect Ratio) additional landmarks
+    left_upper2  = _pt(lm, 160, img_w, img_h)
+    left_upper3  = _pt(lm, 158, img_w, img_h)
+    left_lower5  = _pt(lm, 153, img_w, img_h)
+    left_lower6  = _pt(lm, 144, img_w, img_h)
+    right_upper2 = _pt(lm, 385, img_w, img_h)
+    right_upper3 = _pt(lm, 387, img_w, img_h)
+    right_lower5 = _pt(lm, 380, img_w, img_h)
+    right_lower6 = _pt(lm, 373, img_w, img_h)
+
+    ear_l = (_dist(left_upper2, left_lower6) + _dist(left_upper3, left_lower5)) / (2 * eye_width_l) if eye_width_l > 0 else 0
+    ear_r = (_dist(right_upper2, right_lower6) + _dist(right_upper3, right_lower5)) / (2 * eye_width_r) if eye_width_r > 0 else 0
+    ear = round((ear_l + ear_r) / 2, 3)
+
+    # Face shape
+    fw = forehead_width / face_width if face_width > 0 else 1.0
+    jw = jaw_width / face_width if face_width > 0 else 1.0
+    el = face_height / face_width if face_width > 0 else 1.0
+
+    if fw - jw > 0.15:
+        face_shape = "Сердце"
+    elif fw < 0.80 and jw < 0.80 and abs(fw - jw) < 0.10:
+        face_shape = "Ромб"
+    elif jw - fw > 0.10:
+        face_shape = "Треугольник"
+    elif abs(fw - jw) < 0.08 and el > 1.45:
+        face_shape = "Прямоугольник"
+    elif abs(fw - jw) < 0.10 and el < 1.28:
+        face_shape = "Квадрат"
+    elif el < 1.20:
+        face_shape = "Круг"
+    else:
+        face_shape = "Овал"
+
     # Symmetry — compare left vs right half distances
     sym_points = [
         (_dist(left_eye_outer, nose_tip), _dist(right_eye_outer, nose_tip)),
@@ -133,6 +172,8 @@ def compute_metrics(landmarks, img_w: int, img_h: int) -> dict:
         "fwhr": round(fwhr, 3),
         "symmetry": symmetry,
         "ipd_ratio": round(ipd / face_width, 3) if face_width > 0 else 0,
+        "face_shape": face_shape,
+        "ear": ear,
         "face_width_px": round(face_width, 1),
         "face_height_px": round(face_height, 1),
         "mouth_width_px": round(mouth_width, 1),

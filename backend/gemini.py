@@ -134,6 +134,26 @@ def _describe_forehead(thirds: str) -> tuple[str, str]:
             "Причёски с чёлкой или горизонтальными линиями визуально уменьшают лоб.")
 
 
+def _fatigue_label(ear: float) -> str:
+    if ear >= 0.28:
+        return "Свежий взгляд"
+    if ear >= 0.22:
+        return "Слегка уставший"
+    return "Уставший взгляд"
+
+
+def _face_shape_desc(shape: str) -> str:
+    return {
+        "Овал":         "Универсальная форма — пропорции сбалансированы, черты гармоничны.",
+        "Квадрат":      "Сильная угловая челюсть — признак маскулинности и доминантности.",
+        "Сердце":       "Широкий лоб, узкий подбородок — ассоциируется с молодостью.",
+        "Круг":         "Мягкие черты, полные щёки — снижение жира раскроет структуру.",
+        "Прямоугольник":"Вытянутые пропорции, сильная структура — характерно для высоких.",
+        "Ромб":         "Выраженные скулы при узких лбе и подбородке — острый профиль.",
+        "Треугольник":  "Широкое основание, узкий лоб — работа над скулами улучшит баланс.",
+    }.get(shape, "")
+
+
 def _ethnic_ranges(nationality: Optional[str]) -> dict:
     nat = (nationality or "").lower()
     if any(x in nat for x in ["азиат", "казах", "узбек"]):
@@ -155,6 +175,8 @@ def get_analysis(
     ethnicity: str,
     age: int,
 ) -> dict:
+    face_shape   = metrics.get("face_shape", "Овал")
+    ear          = metrics.get("ear", 0.25)
     canthal      = metrics.get("canthal_tilt", 0)
     symmetry     = metrics.get("symmetry", 0)
     jaw          = metrics.get("jaw_width_ratio", 0)
@@ -226,6 +248,8 @@ def get_analysis(
             "facial_thirds": thirds,
             "canthal_tilt": f"{canthal_display} ({status})",
             "jaw_width": f"{jaw_label} ({jaw:.2f})",
+            "face_shape": face_shape,
+            "fatigue": _fatigue_label(ear),
         },
         "face_parts": [
             {"name": "Глаза",               "score": eye_s,  "rating": _score_to_tier(eye_s),  "description": eye_desc,  "advice": eye_adv},

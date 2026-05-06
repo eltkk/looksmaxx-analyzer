@@ -27,6 +27,8 @@ interface AnalysisResult {
     facial_thirds: string;
     canthal_tilt: string;
     jaw_width: string;
+    face_shape: string;
+    fatigue: string;
   };
   height?: number;
   weight?: number;
@@ -277,6 +279,8 @@ export default function ResultsPage() {
               { label: "Трети лица", value: result.metrics.facial_thirds },
               { label: "Кантальный тилт", value: result.metrics.canthal_tilt },
               { label: "Ширина челюсти", value: result.metrics.jaw_width },
+              { label: "Форма лица", value: result.metrics.face_shape },
+              { label: "Состояние глаз", value: result.metrics.fatigue },
             ].map(({ label, value }) => (
               <div key={label} className="bg-zinc-900 rounded-xl p-4">
                 <div className="text-zinc-500 text-xs mb-1">{label}</div>
