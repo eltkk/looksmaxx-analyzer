@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Upload, Scan, ChevronRight, Zap, Shield, AlertCircle, RefreshCw, Info } from "lucide-react";
 
 const RATING_EXAMPLES = [
-  { tier: "ADAM",      color: "text-yellow-300", desc: "Топ 0.1% — легендарный" },
-  { tier: "TRUE CHAD", color: "text-yellow-300", desc: "Топ 1% — элита" },
-  { tier: "CHAD",      color: "text-yellow-400", desc: "Топ 5% — высокий тир" },
+  { tier: "ADAM",      color: "text-yellow-300", desc: "Топ 0.1% легендарный" },
+  { tier: "TRUE CHAD", color: "text-yellow-300", desc: "Топ 1% элита" },
+  { tier: "CHAD",      color: "text-yellow-400", desc: "Топ 5% высокий тир" },
   { tier: "HTN",       color: "text-green-400",  desc: "Выше среднего" },
   { tier: "MTN",       color: "text-blue-400",   desc: "Средний тир" },
   { tier: "LTN",       color: "text-orange-400", desc: "Ниже среднего" },
@@ -242,7 +242,7 @@ export default function HomePage() {
           <span className="gradient-text">Face Tier</span>
         </h1>
         <p className="text-zinc-400 text-xl max-w-2xl mx-auto leading-relaxed">
-          Загрузи фото — ИИ оценит каждую черту лица, определит твой тир и даст
+          Загрузи фото. ИИ оценит каждую черту лица, определит твой тир и даст
           персональные советы по улучшению
         </p>
       </section>
