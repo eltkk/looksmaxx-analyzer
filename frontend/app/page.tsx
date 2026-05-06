@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { Upload, Scan, ChevronRight, Zap, Shield, AlertCircle, RefreshCw, Info } from "lucide-react";
 
 const RATING_EXAMPLES = [
-  { tier: "ADAM", color: "text-yellow-300", desc: "Топ 0.1% — легендарный" },
-  { tier: "CHAD", color: "text-yellow-400", desc: "Топ 5% — высокий тир" },
-  { tier: "HTN", color: "text-green-400", desc: "Выше среднего" },
-  { tier: "MTN", color: "text-blue-400", desc: "Средний тир" },
-  { tier: "LTN", color: "text-orange-400", desc: "Ниже среднего" },
-  { tier: "SUB5", color: "text-red-400", desc: "Нижний тир" },
+  { tier: "ADAM",      color: "text-yellow-300", desc: "Топ 0.1% — легендарный" },
+  { tier: "TRUE CHAD", color: "text-yellow-300", desc: "Топ 1% — элита" },
+  { tier: "CHAD",      color: "text-yellow-400", desc: "Топ 5% — высокий тир" },
+  { tier: "HTN",       color: "text-green-400",  desc: "Выше среднего" },
+  { tier: "MTN",       color: "text-blue-400",   desc: "Средний тир" },
+  { tier: "LTN",       color: "text-orange-400", desc: "Ниже среднего" },
+  { tier: "SUB5",      color: "text-red-400",    desc: "Нижний тир" },
+  { tier: "SUB3",      color: "text-red-600",    desc: "Нижний тир" },
 ];
 
 const NATIONALITIES = [
@@ -364,7 +366,7 @@ export default function HomePage() {
       <section className="max-w-5xl mx-auto px-6 pb-20">
         <h2 className="text-center text-2xl font-bold text-white mb-3">Шкала оценок</h2>
         <p className="text-center text-zinc-500 text-sm mb-8">Где ты находишься?</p>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
           {RATING_EXAMPLES.map((r) => (
             <div key={r.tier} className="glass rounded-xl p-4 text-center">
               <div className={`text-xl font-bold mb-1 ${r.color}`}>{r.tier}</div>
