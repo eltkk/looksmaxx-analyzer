@@ -55,10 +55,13 @@ async def analyze(
         raise HTTPException(status_code=500, detail=f"Ошибка анализа: {type(e).__name__}: {e}")
 
     result["id"] = result_id
-    if height:
-        result["height"] = int(height)
-    if weight:
-        result["weight"] = int(weight)
+    try:
+        if height:
+            result["height"] = int(height)
+        if weight:
+            result["weight"] = int(weight)
+    except ValueError:
+        pass
     if nationality:
         result["nationality"] = nationality
 
