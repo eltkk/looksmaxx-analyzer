@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Upload, Scan, ChevronRight, Zap, Shield, AlertCircle, RefreshCw, Info } from "lucide-react";
 
 const RATING_EXAMPLES = [
-  { tier: "ADAM",      color: "text-yellow-300", desc: "Топ 0.1% легендарный" },
-  { tier: "TRUE CHAD", color: "text-yellow-300", desc: "Топ 1% элита" },
-  { tier: "CHAD",      color: "text-yellow-400", desc: "Топ 5% высокий тир" },
+  { tier: "ADAM",      color: "text-yellow-300", desc: "Топ 0.1%" },
+  { tier: "TRUE CHAD", color: "text-yellow-300", desc: "Топ 1%" },
+  { tier: "CHAD",      color: "text-yellow-400", desc: "Топ 5%" },
   { tier: "HTN",       color: "text-green-400",  desc: "Выше среднего" },
   { tier: "MTN",       color: "text-blue-400",   desc: "Средний тир" },
   { tier: "LTN",       color: "text-orange-400", desc: "Ниже среднего" },
@@ -18,10 +18,11 @@ const RATING_EXAMPLES = [
 const NATIONALITIES = [
   "Русский", "Украинец", "Белорус",
   "Армянин", "Грузин", "Азербайджанец",
-  "Казах", "Узбек", "Таджик", "Киргиз",
+  "Чеченец", "Дагестанец",
+  "Казах", "Узбек", "Таджик", "Киргиз", "Туркмен",
   "Татарин", "Башкир",
   "Европеец", "Американец",
-  "Турок", "Иранец",
+  "Турок", "Иранец", "Индиец",
   "Азиат", "Латиноамериканец", "Африканец", "Ближневосточный",
 ];
 
