@@ -156,12 +156,14 @@ def _face_shape_desc(shape: str) -> str:
 
 def _ethnic_ranges(nationality: Optional[str]) -> dict:
     nat = (nationality or "").lower()
-    if any(x in nat for x in ["азиат", "казах", "узбек"]):
+    if any(x in nat for x in ["азиат", "казах", "узбек", "таджик", "киргиз"]):
         return {"nose": (0.25, 0.36), "jaw": (0.88, 1.10), "eye": (0.20, 0.36), "fwhr": (0.62, 0.82)}
     if "африканец" in nat:
         return {"nose": (0.30, 0.42), "jaw": (0.92, 1.15), "eye": (0.25, 0.40), "fwhr": (0.60, 0.80)}
-    if "ближневосточный" in nat:
+    if any(x in nat for x in ["ближневосточный", "иранец", "турок"]):
         return {"nose": (0.28, 0.37), "jaw": (0.95, 1.15), "eye": (0.25, 0.38), "fwhr": (0.60, 0.80)}
+    if any(x in nat for x in ["армянин", "грузин", "азербайджанец"]):
+        return {"nose": (0.28, 0.36), "jaw": (0.95, 1.14), "eye": (0.25, 0.38), "fwhr": (0.61, 0.81)}
     if "латиноамерикан" in nat:
         return {"nose": (0.27, 0.36), "jaw": (0.93, 1.13), "eye": (0.25, 0.38), "fwhr": (0.60, 0.80)}
     return {"nose": (0.27, 0.33), "jaw": (0.95, 1.12), "eye": (0.25, 0.38), "fwhr": (0.60, 0.80)}
