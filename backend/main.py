@@ -1,21 +1,28 @@
 import os
 import uuid
 import asyncio
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from analyzer import analyze_face
 from storage import store_result, get_result
 
 load_dotenv()
 
+limiter = Limiter(key_func=get_remote_address)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,7 +33,9 @@ app.add_middleware(
 
 
 @app.post("/analyze")
+@limiter.limit("5/minute")
 async def analyze(
+    request: Request,
     photo: UploadFile = File(...),
     height: str = Form(None),
     weight: str = Form(None),
